@@ -1,0 +1,1441 @@
+Heap Sort:
+#include <iostream>
+using namespace std;
+
+class HeapSort {
+    int *arr;
+    int n;
+
+    void Maxheapify(int i, int size) {
+        int largest = i;
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
+
+        if (left < size && arr[left] > arr[largest])
+            largest = left;
+        if (right < size && arr[right] > arr[largest])
+            largest = right;
+        if (largest != i) {
+            swap(arr[i], arr[largest]);
+            Maxheapify(largest, size);
+        }
+    }
+
+    void Minheapify(int i, int size) {
+        int smallest = i;
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
+
+        if (left < size && arr[left] < arr[smallest])
+            smallest = left;
+        if (right < size && arr[right] < arr[smallest])
+            smallest = right;
+        if (smallest != i) {
+            swap(arr[i], arr[smallest]);
+            Minheapify(smallest, size);
+        }
+    }
+
+public:
+    HeapSort(int length) {
+        n = length;
+        arr = new int[n];
+    }
+
+    ~HeapSort() {
+        delete[] arr;
+    }
+
+    void inputArray() {
+        cout << "Enter " << n << " elements: ";
+        for (int i = 0; i < n; i++)
+            cin >> arr[i];
+    }
+
+    void displayArray() {
+        for (int i = 0; i < n; i++)
+            cout << arr[i] << " ";
+        cout << endl;
+    }
+
+    void sortAscending() {
+        for (int i = n / 2 - 1; i >= 0; i--)
+            Maxheapify(i, n);
+
+        for (int i = n - 1; i > 0; i--) {
+            swap(arr[0], arr[i]);
+            Maxheapify(0, i);
+        }
+    }
+
+    void sortDescending() {
+        for (int i = n / 2 - 1; i >= 0; i--)
+            Minheapify(i, n);
+
+        for (int i = n - 1; i > 0; i--) {
+            swap(arr[0], arr[i]);
+            Minheapify(0, i);
+        }
+    }
+};
+
+int main() {
+    int n, choice;
+    cout << "Enter the length of the array: ";
+    cin >> n;
+
+    HeapSort hs(n);
+    hs.inputArray();
+
+    while (true) {
+        cout << "\n--- Menu ---\n";
+        cout << "1. Display Array\n";
+        cout << "2. Sort in Ascending Order\n";
+        cout << "3. Sort in Descending Order\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Array: ";
+                hs.displayArray();
+                break;
+
+            case 2:
+                hs.sortAscending();
+                cout << "Sorted in Ascending Order: ";
+                hs.displayArray();
+                break;
+
+            case 3:
+                hs.sortDescending();
+                cout << "Sorted in Descending Order: ";
+                hs.displayArray();
+                break;
+
+            case 0:
+                cout << "Exiting...\n";
+                return 0;
+
+            default:
+                cout << "Invalid choice. Try again.\n";
+        }
+    }
+
+    return 0;
+}
+-----------------------------------------------------------------
+MST:
+#include <iostream>
+using namespace std;
+
+#define V 5
+#define E 10
+
+
+class Prims {
+    int graph[V][V];
+
+public:
+    void input() {
+        cout << "\nEnter adjacency matrix (" << V << "x" << V << "):\n";
+        for (int i = 0; i < V; i++)
+            for (int j = 0; j < V; j++)
+                cin >> graph[i][j];
+    }
+
+    void primMST() {
+        int parent[V], key[V];
+        bool mstSet[V];
+
+        for (int i = 0; i < V; i++) {
+            key[i] = 9999;
+            mstSet[i] = false;
+        }
+
+        key[0] = 0;
+        parent[0] = -1;
+
+        for (int count = 0; count < V - 1; count++) {
+            int min = 9999, u;
+
+            for (int v = 0; v < V; v++)
+                if (!mstSet[v] && key[v] < min) {
+                    min = key[v];
+                    u = v;
+                }
+
+            mstSet[u] = true;
+
+            for (int v = 0; v < V; v++)
+                if (graph[u][v] && !mstSet[v] && graph[u][v] < key[v]) {
+                    parent[v] = u;
+                    key[v] = graph[u][v];
+                }
+        }
+
+        int totalCost = 0;
+        cout << "\nPrim's MST Edges:\nEdge \tWeight\n";
+        for (int i = 1; i < V; i++) {
+            cout << parent[i] << " - " << i << "\t" << graph[i][parent[i]] << endl;
+            totalCost += graph[i][parent[i]];
+        }
+        cout << "Total Minimum Cost = " << totalCost << endl;
+    }
+};
+
+
+class Kruskal {
+    int edges[E][3];
+    int parent[V];
+    int nEdges;
+
+public:
+    Kruskal() { nEdges = 0; }
+
+    void input() {
+        cout << "\nEnter number of edges: ";
+        cin >> nEdges;
+        cout << "Enter edges (u v weight):\n";
+        for (int i = 0; i < nEdges; i++)
+            cin >> edges[i][0] >> edges[i][1] >> edges[i][2];
+    }
+
+    int find(int i) {
+        while (parent[i] != i)
+            i = parent[i];
+        return i;
+    }
+
+    void unionSet(int i, int j) {
+        int a = find(i);
+        int b = find(j);
+        parent[a] = b;
+    }
+
+    void kruskalMST() {
+        for (int i = 0; i < V; i++) parent[i] = i;
+
+        // Sort edges by weight (bubble sort)
+        for (int i = 0; i < nEdges - 1; i++)
+            for (int j = 0; j < nEdges - i - 1; j++)
+                if (edges[j][2] > edges[j + 1][2])
+                    swap(edges[j], edges[j + 1]);
+
+        int totalCost = 0, count = 0;
+
+        cout << "\nKruskal's MST Edges:\nEdge \tWeight\n";
+        for (int i = 0; i < nEdges && count < V - 1; i++) {
+            int u = edges[i][0];
+            int v = edges[i][1];
+            int w = edges[i][2];
+
+            if (find(u) != find(v)) {
+                cout << u << " - " << v << "\t" << w << endl;
+                totalCost += w;
+                unionSet(u, v);
+                count++;
+            }
+        }
+
+        cout << "Total Minimum Cost = " << totalCost << endl;
+    }
+};
+
+
+int main() {
+    Prims primObj;
+    Kruskal kruskalObj;
+
+    int choice;
+
+    do {
+        cout << "\n--- Minimum Spanning Tree Menu ---\n";
+        cout << "1. Input Graph for Prim's\n";
+        cout << "2. Run Prim's MST\n";
+        cout << "3. Input Edges for Kruskal's\n";
+        cout << "4. Run Kruskal's MST\n";
+        cout << "0. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1: primObj.input(); break;
+        case 2: primObj.primMST(); break;
+        case 3: kruskalObj.input(); break;
+        case 4: kruskalObj.kruskalMST(); break;
+        case 0: cout << "Exiting...\n"; break;
+        default: cout << "Invalid choice!\n";
+        }
+    } while (choice != 0);
+
+    return 0;
+}
+---------------------------------------------------------
+ProbablisticDatastructure:
+#include <iostream>
+using namespace std;
+
+class BloomFilter {
+    bool bits[100];
+
+    int hash1(string s) {
+        int sum = 0;
+        for(int i = 0; i < s.length(); i++)
+            sum += s[i];
+        return sum % 100;
+    }
+
+    int hash2(string s) {
+        int hash = 1;
+        for(int i = 0; i < s.length(); i++)
+            hash = (hash * 17 + s[i]) % 100;
+        return hash;
+    }
+
+public:
+    BloomFilter() {
+        for(int i = 0; i < 100; i++)
+            bits[i] = false;
+    }
+
+    void insert(string s) {
+        if(s == "") {
+            cout << "Cannot insert empty string.\n";
+            return;
+        }
+        bits[hash1(s)] = true;
+        bits[hash2(s)] = true;
+        cout << "\"" << s << "\" inserted into Bloom Filter.\n";
+    }
+
+    bool check(string s) {
+        if(s == "") {
+            cout << "Cannot check empty string.\n";
+            return false;
+        }
+        return bits[hash1(s)] && bits[hash2(s)];
+    }
+};
+
+class CountMinSketch {
+    int table[2][100];
+
+    int hash1(string s) {
+        int sum = 0;
+        for(int i = 0; i < s.length(); i++)
+            sum += s[i];
+        return sum % 100;
+    }
+
+    int hash2(string s) {
+        int hash = 1;
+        for(int i = 0; i < s.length(); i++)
+            hash = (hash * 17 + s[i]) % 100;
+        return hash;
+    }
+
+public:
+    CountMinSketch() {
+        for(int i = 0; i < 2; i++)
+            for(int j = 0; j < 100; j++)
+                table[i][j] = 0;
+    }
+
+    void insert(string s) {
+        if(s == "") {
+            cout << "Cannot insert empty string.\n";
+            return;
+        }
+        table[0][hash1(s)]++;
+        table[1][hash2(s)]++;
+        cout << "\"" << s << "\" inserted into Count-Min Sketch.\n";
+    }
+
+    int estimate(string s) {
+        if(s == "") {
+            cout << "Cannot estimate empty string.\n";
+            return 0;
+        }
+        int count1 = table[0][hash1(s)];
+        int count2 = table[1][hash2(s)];
+        return (count1 < count2) ? count1 : count2;
+    }
+};
+
+int main() {
+    BloomFilter bf;
+    CountMinSketch cms;
+
+    int choice;
+    string s;
+
+    while (true) {
+        cout << "\n--- Menu ---\n";
+        cout << "1. Bloom Filter - Insert string\n";
+        cout << "2. Bloom Filter - Check string\n";
+        cout << "3. Count-Min Sketch - Insert string\n";
+        cout << "4. Count-Min Sketch - Estimate frequency\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch(choice) {
+            case 1:
+                cout << "Enter string to insert into Bloom Filter: ";
+                cin >> s;
+                bf.insert(s);
+                break;
+
+            case 2:
+                cout << "Enter string to check in Bloom Filter: ";
+                cin >> s;
+                if(bf.check(s))
+                    cout << "\"" << s << "\" is possibly present.\n";
+                else
+                    cout << "\"" << s << "\" is definitely not present.\n";
+                break;
+
+            case 3:
+                cout << "Enter string to insert into Count-Min Sketch: ";
+                cin >> s;
+                cms.insert(s);
+                break;
+
+            case 4:
+                cout << "Enter string to estimate frequency in Count-Min Sketch: ";
+                cin >> s;
+                cout << "Estimated frequency: " << cms.estimate(s) << endl;
+                break;
+
+            case 0:
+                cout << "Exiting program.\n";
+                return 0;
+
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    }
+
+    return 0;
+}
+-----------------------------------------------------------
+BST:
+#include <iostream>
+using namespace std;
+
+class Node {
+public:
+    int data;
+    Node* left;
+    Node* right;
+
+    Node(int value) {
+        data = value;
+        left = right = NULL;
+    }
+};
+
+class BinaryTree {
+public:
+    Node* root;
+
+    BinaryTree() {
+        root = NULL;
+    }
+
+    void createNode(int value);
+    void Inorder(Node* node);
+    void Preorder(Node* node);
+    void Postorder(Node* node);
+    Node* deleteNode(Node* node, int key);
+    Node* minValueNode(Node* node);
+    void nonRecursiveInorder();
+    void nonRecursivePreorder();
+    void nonRecursivePostorder();
+    void levelWisePrinting();
+    void menu();
+};
+
+void BinaryTree::createNode(int value) {
+    Node* temp = new Node(value);
+
+    if (root == NULL) {
+        root = temp;
+    } else {
+        Node* current = root;
+
+        while (true) {
+            if (value < current->data) {
+                if (current->left == NULL) {
+                    current->left = temp;
+                    break;
+                } else {
+                    current = current->left;
+                }
+            } else {
+                if (current->right == NULL) {
+                    current->right = temp;
+                    break;
+                } else {
+                    current = current->right;
+                }
+            }	
+        }
+    }
+}
+
+void BinaryTree::Inorder(Node* node) {
+    if (node == NULL) {
+        return;
+    }
+    Inorder(node->left);
+    cout << node->data << " ";
+    Inorder(node->right);
+}
+
+void BinaryTree::Preorder(Node* node) {
+    if (node == NULL) {
+        return;
+    }
+
+    cout << node->data << " ";
+    Preorder(node->left);
+    Preorder(node->right);
+}
+
+void BinaryTree::Postorder(Node* node) {
+    if (node == NULL) {
+        return;
+    }
+
+    Postorder(node->left);
+    Postorder(node->right);
+    cout << node->data << " ";
+}
+
+Node* BinaryTree::minValueNode(Node* node) {
+    Node* current = node;
+
+    while (current && current->left != NULL) {
+        current = current->left;
+    }
+
+    return current;
+}
+
+Node* BinaryTree::deleteNode(Node* root, int key) {
+    if (root == NULL) {
+        return root;
+    }
+
+    if (key < root->data) {
+        root->left = deleteNode(root->left, key);
+    } else if (key > root->data) {
+        root->right = deleteNode(root->right, key);
+    } else {
+        if (root->left == NULL && root->right == NULL) {
+            delete root;
+            return NULL;
+        } else if (root->left == NULL) {
+            Node* temp = root->right;
+            delete root;
+            return temp;
+        } else if (root->right == NULL) {
+            Node* temp = root->left;
+            delete root;
+            return temp;
+        } else {
+            Node* temp = minValueNode(root->right);
+            root->data = temp->data;
+            root->right = deleteNode(root->right, temp->data);
+        }
+    }
+    return root;
+}
+
+void BinaryTree::levelWisePrinting() {
+    if (root == NULL) {
+        cout << "Tree is empty.\n";
+        return;
+    }
+
+    Node* queue[100];
+    int front = 0, rear = 0;
+
+    queue[rear++] = root;
+
+    while (front != rear) {
+        Node* current = queue[front++];
+        cout << current->data << " ";
+
+        if (current->left) {
+		queue[rear++] = current->left;
+	}
+        if (current->right) queue[rear++] = current->right;
+    }
+    cout << endl;
+}
+void BinaryTree::nonRecursiveInorder() {
+    if (root == NULL) {
+        cout << "Tree is empty!" << endl;
+        return;
+    }
+    Node* current = root;
+    Node* stack[100];
+    int top = -1;
+    while (current != NULL || top != -1) {
+        while (current != NULL) {
+            stack[++top] = current;
+            current = current->left;
+        }
+        current = stack[top--];
+        cout << current->data << " ";
+        current = current->right;
+    }
+}
+
+void BinaryTree::nonRecursivePreorder() {
+    if (root == NULL) {
+        cout << "Tree is empty!" << endl;
+        return;
+    }
+    Node* stack[100];
+    int top = -1;
+    stack[++top] = root;
+    while (top != -1) {
+        Node* current = stack[top--];
+        cout << current->data << " ";
+        if (current->right != NULL) {
+            stack[++top] = current->right;
+        }
+        if (current->left != NULL) {
+            stack[++top] = current->left;
+        }
+    }
+}
+
+void BinaryTree::nonRecursivePostorder() {
+    if (root == NULL) {
+        cout << "Tree is empty!" << endl;
+        return;
+    }
+
+    Node* stack1[100];
+    Node* stack2[100];
+    int top1 = -1, top2 = -1;
+
+    stack1[++top1] = root;
+
+    while (top1 != -1) {
+        Node* current = stack1[top1--];
+        stack2[++top2] = current;      
+        if (current->left != NULL) {
+            stack1[++top1] = current->left;
+        }
+        if (current->right != NULL) {
+            stack1[++top1] = current->right;
+        }
+    }
+    while (top2 != -1) {
+        cout << stack2[top2--]->data << " ";
+    }
+}
+
+void BinaryTree::menu() {
+    int choice, value;
+
+    do {
+        cout << "\nMenu:\n";
+        cout << "1. Insert\n";
+        cout << "2. Recursive Inorder Traversal\n";
+        cout << "3. Recursive Preorder Traversal\n";
+        cout << "4. Recursive Postorder Traversal\n";
+        cout << "5. Deletion of a Node\n";
+        cout << "6. Level Wise Printing\n";
+        cout << "7. Non Recursive Inorder\n";
+         cout << "8. Non Recursive Preorder\n";
+          cout << "9. Non Recursive Postorder\n";
+        cout << "10. Quit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter value to insert: ";
+                cin >> value;
+                createNode(value);
+                break;
+            case 2:
+                cout << "Recursive Inorder Traversal: ";
+                Inorder(root);
+                cout << endl;
+                break;
+            case 3:
+                cout << "Recursive Preorder Traversal: ";
+                Preorder(root);
+                cout << endl;
+                break;
+            case 4:
+                cout << "Recursive Postorder Traversal: ";
+                Postorder(root);
+                cout << endl;
+                break;
+            case 5:
+                cout << "Enter value to delete: ";
+                cin >> value;
+                root = deleteNode(root, value);
+                cout << "Node deleted.\n";
+                break;
+            case 6:
+                cout << "Level Wise Printing: ";
+                levelWisePrinting();
+                break;
+            case 7:
+                cout << "Non Recursive Inorder: ";
+                nonRecursiveInorder();
+                break;
+            case 8:
+                cout << "Non Recursive Preorder: ";
+                nonRecursivePreorder();
+                break;
+            case 9:
+                cout << "Non Recursive Postorder: ";
+                nonRecursivePostorder();
+                break;
+            case 10:
+                cout << "Exiting program.\n";
+                break;
+            default:
+                cout << "Invalid choice! Please try again.\n";
+        }
+    } while (choice != 10);
+}
+
+int main() {
+    BinaryTree bt;
+    bt.menu();
+    return 0;
+}
+-----------------------------------------------------------------
+AVL:
+#include <iostream>
+#include <queue>
+using namespace std;
+
+class avlnode {
+public:
+    int data;
+    avlnode *left, *right;
+    avlnode(int val) : data(val), left(NULL), right(NULL) {}
+};
+
+class stack {
+    int top;
+    avlnode *stack_nodes[20];
+
+public:
+    stack() { top = -1; }
+    void push(avlnode *node) { stack_nodes[++top] = node; }
+    avlnode* pop() { return stack_nodes[top--]; }
+    bool empty() { return (top == -1); }
+};
+
+class avlTree {
+    avlnode *root;
+
+public:
+    avlTree() { root = NULL; }
+
+    int height(avlnode *);
+    int diff(avlnode *);
+    avlnode *rr_rotation(avlnode *);
+    avlnode *ll_rotation(avlnode *);
+    avlnode *lr_rotation(avlnode *);
+    avlnode *rl_rotation(avlnode *);
+    avlnode* balance(avlnode *);
+    avlnode* insert(avlnode *, int);
+    void insert(int val) { root = insert(root, val); }
+
+    void display();
+    void inorder(avlnode *);
+    void inorder();
+    void preorder(avlnode *);
+    void preorder();
+    void postorder(avlnode *);
+    void postorder();
+    void inorder_non_rec();
+    void preorder_non_rec();
+    void postorder_non_rec();
+};
+
+int avlTree::height(avlnode *temp) {
+    if (temp == NULL) return 0;
+    return max(height(temp->left), height(temp->right)) + 1;
+}
+
+int avlTree::diff(avlnode *temp) {
+    return height(temp->left) - height(temp->right);
+}
+
+avlnode *avlTree::rr_rotation(avlnode *parent) {
+    avlnode *temp = parent->right;
+    parent->right = temp->left;
+    temp->left = parent;
+    return temp;
+}
+
+avlnode *avlTree::ll_rotation(avlnode *parent) {
+    avlnode *temp = parent->left;
+    parent->left = temp->right;
+    temp->right = parent;
+    return temp;
+}
+
+avlnode *avlTree::lr_rotation(avlnode *parent) {
+    parent->left = rr_rotation(parent->left);
+    return ll_rotation(parent);
+}
+
+avlnode *avlTree::rl_rotation(avlnode *parent) {
+    parent->right = ll_rotation(parent->right);
+    return rr_rotation(parent);
+}
+
+avlnode *avlTree::balance(avlnode *temp) {
+    int bal_factor = diff(temp);
+    if (bal_factor > 1) {
+        if (diff(temp->left) > 0)
+            temp = ll_rotation(temp);
+        else
+            temp = lr_rotation(temp);
+    } else if (bal_factor < -1) {
+        if (diff(temp->right) > 0)
+            temp = rl_rotation(temp);
+        else
+            temp = rr_rotation(temp);
+    }
+    return temp;
+}
+
+avlnode *avlTree::insert(avlnode *root, int value) {
+    if (root == NULL) return new avlnode(value);
+    if (value < root->data)
+        root->left = insert(root->left, value);
+    else if (value > root->data)
+        root->right = insert(root->right, value);
+    else
+        cout << "Node already exists" << endl;
+    return balance(root);
+}
+
+void avlTree::display() {
+    if (root == NULL) {
+        cout << "Tree is empty.\n";
+        return;
+    }
+    queue<avlnode*> q;
+    q.push(root);
+    cout << "\nAVL Tree (Level-wise Display):\n";
+    while (!q.empty()) {
+        int size = q.size();
+        while (size--) {
+            avlnode *temp = q.front();
+            q.pop();
+            cout << temp->data << " ";
+            if (temp->left) q.push(temp->left);
+            if (temp->right) q.push(temp->right);
+        }
+    }
+    cout << endl;
+}
+
+void avlTree::inorder() {
+    cout << "\nInorder Traversal: ";
+    inorder(root);
+    cout << endl;
+}
+
+void avlTree::inorder(avlnode *tree) {
+    if (tree == NULL) return;
+    inorder(tree->left);
+    cout << tree->data << " ";
+    inorder(tree->right);
+}
+
+void avlTree::preorder() {
+    cout << "\nPreorder Traversal: ";
+    preorder(root);
+    cout << endl;
+}
+
+void avlTree::preorder(avlnode *tree) {
+    if (tree == NULL) return;
+    cout << tree->data << " ";
+    preorder(tree->left);
+    preorder(tree->right);
+}
+
+void avlTree::postorder() {
+    cout << "\nPostorder Traversal: ";
+    postorder(root);
+    cout << endl;
+}
+
+void avlTree::postorder(avlnode *tree) {
+    if (tree == NULL) return;
+    postorder(tree->left);
+    postorder(tree->right);
+    cout << tree->data << " ";
+}
+
+void avlTree::inorder_non_rec() {
+    cout << "\nNon-Recursive Inorder Traversal: ";
+    stack stk;
+    avlnode *temp = root;
+    while (1) {
+        while (temp != NULL) {
+            stk.push(temp);
+            temp = temp->left;
+        }
+        if (!stk.empty()) {
+            temp = stk.pop();
+            cout << temp->data << " ";
+            temp = temp->right;
+        } else break;
+    }
+    cout << endl;
+}
+
+void avlTree::preorder_non_rec() {
+    cout << "\nNon-Recursive Preorder Traversal: ";
+    stack stk;
+    avlnode *temp = root;
+    stk.push(temp);
+    while (!stk.empty()) {
+        temp = stk.pop();
+        if (temp != NULL) {
+            cout << temp->data << " ";
+            stk.push(temp->right);
+            stk.push(temp->left);
+        }
+    }
+    cout << endl;
+}
+
+void avlTree::postorder_non_rec() {
+    cout << "\nNon-Recursive Postorder Traversal: ";
+    stack stk, stk2;
+    avlnode *temp = root;
+    stk.push(temp);
+    while (!stk.empty()) {
+        temp = stk.pop();
+        stk2.push(temp);
+        if (temp->left) stk.push(temp->left);
+        if (temp->right) stk.push(temp->right);
+    }
+    while (!stk2.empty()) {
+        temp = stk2.pop();
+        cout << temp->data << " ";
+    }
+    cout << endl;
+}
+
+int main() {
+    avlTree avl;
+    int choice, item;
+    while (1) {
+        cout << "\nAVL Tree Operations:\n";
+        cout << "1.Insert\n2.Display\n3.Inorder\n4.Preorder\n5.Postorder\n";
+        cout << "6.Non-Recursive Inorder\n7.Non-Recursive Preorder\n";
+        cout << "8.Non-Recursive Postorder\n9.Exit\nEnter choice: ";
+        cin >> choice;
+        switch (choice) {
+            case 1:
+                cout << "Enter value to insert: ";
+                cin >> item;
+                avl.insert(item);
+                break;
+            case 2:
+                avl.display();
+                break;
+            case 3:
+                avl.inorder();
+                break;
+            case 4:
+                avl.preorder();
+                break;
+            case 5:
+                avl.postorder();
+                break;
+            case 6:
+                avl.inorder_non_rec();
+                break;
+            case 7:
+                avl.preorder_non_rec();
+                break;
+            case 8:
+                avl.postorder_non_rec();
+                break;
+            case 9:
+                return 0;
+            default:
+                cout << "Invalid choice!" << endl;
+        }
+    }
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include <iostream>
+#include <queue>
+#include <stack>
+using namespace std;
+
+class avlnode {
+public:
+    int data;
+    avlnode *left, *right;
+    avlnode(int val) : data(val), left(NULL), right(NULL) {}
+};
+
+class avlTree {
+    avlnode *root;
+
+public:
+    avlTree() { root = NULL; }
+
+    int height(avlnode *);
+    int diff(avlnode *);
+    avlnode *rr_rotation(avlnode *);
+    avlnode *ll_rotation(avlnode *);
+    avlnode *lr_rotation(avlnode *);
+    avlnode *rl_rotation(avlnode *);
+    avlnode* balance(avlnode *);
+    avlnode* insert(avlnode *, int);
+    void insert(int val) { root = insert(root, val); }
+
+    void display();
+    void inorder(avlnode *);
+    void inorder();
+    void preorder(avlnode *);
+    void preorder();
+    void postorder(avlnode *);
+    void postorder();
+    void inorder_non_rec();
+    void preorder_non_rec();
+    void postorder_non_rec();
+};
+
+int avlTree::height(avlnode *temp) {
+    if (temp == NULL) return 0;
+    return max(height(temp->left), height(temp->right)) + 1;
+}
+
+int avlTree::diff(avlnode *temp) {
+    return height(temp->left) - height(temp->right);
+}
+
+avlnode *avlTree::rr_rotation(avlnode *parent) {
+    avlnode *temp = parent->right;
+    parent->right = temp->left;
+    temp->left = parent;
+    return temp;
+}
+
+avlnode *avlTree::ll_rotation(avlnode *parent) {
+    avlnode *temp = parent->left;
+    parent->left = temp->right;
+    temp->right = parent;
+    return temp;
+}
+
+avlnode *avlTree::lr_rotation(avlnode *parent) {
+    parent->left = rr_rotation(parent->left);
+    return ll_rotation(parent);
+}
+
+avlnode *avlTree::rl_rotation(avlnode *parent) {
+    parent->right = ll_rotation(parent->right);
+    return rr_rotation(parent);
+}
+
+avlnode *avlTree::balance(avlnode *temp) {
+    int bal_factor = diff(temp);
+    if (bal_factor > 1) {
+        if (diff(temp->left) > 0)
+            temp = ll_rotation(temp);
+        else
+            temp = lr_rotation(temp);
+    } else if (bal_factor < -1) {
+        if (diff(temp->right) > 0)
+            temp = rl_rotation(temp);
+        else
+            temp = rr_rotation(temp);
+    }
+    return temp;
+}
+
+avlnode *avlTree::insert(avlnode *root, int value) {
+    if (root == NULL) return new avlnode(value);
+    if (value < root->data)
+        root->left = insert(root->left, value);
+    else if (value > root->data)
+        root->right = insert(root->right, value);
+    else
+        cout << "Node already exists" << endl;
+    return balance(root);
+}
+
+void avlTree::display() {
+    if (root == NULL) {
+        cout << "Tree is empty.\n";
+        return;
+    }
+    queue<avlnode*> q;
+    q.push(root);
+    cout << "\nAVL Tree (Level-wise Display):\n";
+    while (!q.empty()) {
+        int size = q.size();
+        while (size--) {
+            avlnode *temp = q.front();
+            q.pop();
+            cout << temp->data << " ";
+            if (temp->left) q.push(temp->left);
+            if (temp->right) q.push(temp->right);
+        }
+    }
+    cout << endl;
+}
+
+void avlTree::inorder() {
+    cout << "\nInorder Traversal: ";
+    inorder(root);
+    cout << endl;
+}
+
+void avlTree::inorder(avlnode *tree) {
+    if (tree == NULL) return;
+    inorder(tree->left);
+    cout << tree->data << " ";
+    inorder(tree->right);
+}
+
+void avlTree::preorder() {
+    cout << "\nPreorder Traversal: ";
+    preorder(root);
+    cout << endl;
+}
+
+void avlTree::preorder(avlnode *tree) {
+    if (tree == NULL) return;
+    cout << tree->data << " ";
+    preorder(tree->left);
+    preorder(tree->right);
+}
+
+void avlTree::postorder() {
+    cout << "\nPostorder Traversal: ";
+    postorder(root);
+    cout << endl;
+}
+
+void avlTree::postorder(avlnode *tree) {
+    if (tree == NULL) return;
+    postorder(tree->left);
+    postorder(tree->right);
+    cout << tree->data << " ";
+}
+
+void avlTree::inorder_non_rec() {
+    cout << "\nNon-Recursive Inorder Traversal: ";
+    stack<avlnode*> stk;
+    avlnode *temp = root;
+    while (true) {
+        while (temp != NULL) {
+            stk.push(temp);
+            temp = temp->left;
+        }
+        if (!stk.empty()) {
+            temp = stk.top();
+            stk.pop();
+            cout << temp->data << " ";
+            temp = temp->right;
+        } else break;
+    }
+    cout << endl;
+}
+
+void avlTree::preorder_non_rec() {
+    cout << "\nNon-Recursive Preorder Traversal: ";
+    if (root == NULL) return;
+    stack<avlnode*> stk;
+    stk.push(root);
+    while (!stk.empty()) {
+        avlnode *temp = stk.top();
+        stk.pop();
+        cout << temp->data << " ";
+        if (temp->right) stk.push(temp->right);
+        if (temp->left) stk.push(temp->left);
+    }
+    cout << endl;
+}
+
+void avlTree::postorder_non_rec() {
+    cout << "\nNon-Recursive Postorder Traversal: ";
+    if (root == NULL) return;
+    stack<avlnode*> stk1, stk2;
+    stk1.push(root);
+    while (!stk1.empty()) {
+        avlnode *temp = stk1.top();
+        stk1.pop();
+        stk2.push(temp);
+        if (temp->left) stk1.push(temp->left);
+        if (temp->right) stk1.push(temp->right);
+    }
+    while (!stk2.empty()) {
+        cout << stk2.top()->data << " ";
+        stk2.pop();
+    }
+    cout << endl;
+}
+
+int main() {
+    avlTree avl;
+    int choice, item;
+    while (1) {
+        cout << "\nAVL Tree Operations:\n";
+        cout << "1.Insert\n2.Display\n3.Inorder\n4.Preorder\n5.Postorder\n";
+        cout << "6.Non-Recursive Inorder\n7.Non-Recursive Preorder\n";
+        cout << "8.Non-Recursive Postorder\n9.Exit\nEnter choice: ";
+        cin >> choice;
+        switch (choice) {
+            case 1:
+                cout << "Enter value to insert: ";
+                cin >> item;
+                avl.insert(item);
+                break;
+            case 2:
+                avl.display();
+                break;
+            case 3:
+                avl.inorder();
+                break;
+            case 4:
+                avl.preorder();
+                break;
+            case 5:
+                avl.postorder();
+                break;
+            case 6:
+                avl.inorder_non_rec();
+                break;
+            case 7:
+                avl.preorder_non_rec();
+                break;
+            case 8:
+                avl.postorder_non_rec();
+                break;
+            case 9:
+                return 0;
+            default:
+                cout << "Invalid choice!" << endl;
+        }
+    }
+}
+-------------------------------------------------------
+TBT:
+#include <iostream> 
+using namespace std; 
+ 
+class ThreadedBinaryTree { 
+private: 
+    class Node { 
+    public: 
+        int data; 
+        Node *left, *right; 
+        int lbit, rbit; 
+ 
+        Node(int val) { 
+            data = val; 
+            left = right = nullptr; 
+            lbit = rbit = 0; 
+        } 
+    }; 
+ 
+    Node *root, *head; 
+ 
+public: 
+    ThreadedBinaryTree(); 
+    void create(); 
+    void insert(Node *temp); 
+    void inorder(); 
+    void preorder(); 
+    void search(int key);   
+    void displayMenu(); 
+    void executeMenu(); 
+}; 
+ 
+ThreadedBinaryTree::ThreadedBinaryTree() { 
+    root = nullptr; 
+    head = nullptr; 
+} 
+ 
+void ThreadedBinaryTree::create() { 
+    char ch; 
+    do { 
+        int val; 
+        cout << "Enter data: "; 
+        cin >> val; 
+        Node *temp = new Node(val); 
+        
+        if (root == nullptr) { 
+            root = temp; 
+            head = new Node(999); 
+            head->right = head; 
+            head->rbit = 1; 
+            head->left = root; 
+            head->lbit = 1; 
+            root->left = head; 
+            root->right = head; 
+        } else { 
+            insert(temp); 
+        } 
+        
+        cout << "Do you want to insert more nodes? (y/n): "; 
+        cin >> ch; 
+    } while (ch == 'y'); 
+} 
+ 
+void ThreadedBinaryTree::insert(Node *temp) { 
+    Node *current = root, *parent = nullptr; 
+    while (current != head) { 
+        parent = current; 
+        if (temp->data < current->data) { 
+            if (current->lbit == 1) 
+                current = current->left; 
+            else 
+                break; 
+        } else { 
+            if (current->rbit == 1) 
+                current = current->right; 
+            else 
+                break; 
+        } 
+    } 
+ 
+    if (temp->data < parent->data) { 
+        temp->left = parent->left; 
+        temp->right = parent; 
+        parent->left = temp; 
+        parent->lbit = 1; 
+    } else { 
+        temp->right = parent->right; 
+        temp->left = parent; 
+        parent->right = temp; 
+        parent->rbit = 1; 
+    } 
+} 
+ 
+void ThreadedBinaryTree::inorder() { 
+    Node *current = head->left; 
+    while (current != head) { 
+        while (current->lbit == 1) 
+            current = current->left; 
+        cout << current->data << " "; 
+        
+        while (current->rbit == 0) { 
+            current = current->right; 
+            if (current == head) return; 
+            cout << current->data << " "; 
+        } 
+        current = current->right; 
+    } 
+} 
+ 
+void ThreadedBinaryTree::preorder() { 
+    Node *current = head->left; 
+    while (current != head) { 
+        cout << current->data << " "; 
+        
+        if (current->lbit == 1) 
+            current = current->left; 
+        else { 
+            while (current->rbit == 0 && current->right != head) 
+                current = current->right; 
+            current = current->right; 
+        } 
+    } 
+} 
+
+
+void ThreadedBinaryTree::search(int key) {
+    Node *current = root;
+    while (current != head) {
+        if (key == current->data) {
+            cout << "Element " << key << " found in the tree.\n";
+            return;
+        } else if (key < current->data) {
+            if (current->lbit == 1)
+                current = current->left;
+            else
+                break;
+        } else {
+            if (current->rbit == 1)
+                current = current->right;
+            else
+                break;
+        }
+    }
+    cout << "Element " << key << " not found in the tree.\n";
+}
+ 
+void ThreadedBinaryTree::displayMenu() { 
+    cout << "\nMenu:\n"; 
+    cout << "1. Insert Node\n"; 
+    cout << "2. Inorder Traversal\n"; 
+    cout << "3. Preorder Traversal\n"; 
+    cout << "4. Search Node\n";  // <-- added in menu
+    cout << "5. Exit\n"; 
+} 
+ 
+void ThreadedBinaryTree::executeMenu() { 
+    int choice; 
+    do { 
+        displayMenu(); 
+        cout << "Enter your choice: "; 
+        cin >> choice; 
+        switch (choice) { 
+        case 1: 
+            create(); 
+            break; 
+        case 2: 
+            cout << "\nInorder Traversal: ";     
+            inorder(); 
+            cout << endl; 
+            break; 
+        case 3: 
+            cout << "\nPreorder Traversal: "; 
+            preorder(); 
+            cout << endl; 
+            break; 
+        case 4:
+            int key;
+            cout << "Enter element to search: ";
+            cin >> key;
+            search(key);
+            break;
+        case 5: 
+            cout << "Exiting program...\n"; 
+            break; 
+        default: 
+            cout << "Invalid choice, please try again.\n"; 
+        } 
+    } while (choice != 5); 
+} 
+ 
+int main() { 
+    ThreadedBinaryTree tree; 
+    tree.executeMenu(); 
+    return 0; 
+}

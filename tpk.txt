@@ -1,0 +1,1190 @@
+#include <iostream>
+#include <stack>
+#include <queue>
+using namespace std;
+
+class Node {
+public:
+    int data;
+    Node* left;
+    Node* right;
+
+    Node(int value) {
+        data = value;
+        left = right = nullptr;
+    }
+};
+
+class BinaryTree {
+public:
+    Node* root;
+
+    BinaryTree() { root = nullptr; }
+
+    void createNode(int value);
+    void Inorder(Node* node);
+    void Preorder(Node* node);
+    void Postorder(Node* node);
+    Node* deleteNode(Node* node, int key);
+    void levelWisePrinting();
+    void nonRecursiveInorder();
+    void nonRecursivePreorder();
+    void nonRecursivePostorder();
+    void menu();
+    Node* search(Node* node, int key);
+
+private:
+    Node* minValueNode(Node* node);
+};
+
+void BinaryTree::createNode(int value) {
+    Node* temp = new Node(value);
+    if (!root) {
+        root = temp;
+        return;
+    }
+    Node* current = root;
+    while (true) {
+        if (value < current->data) {
+            if (!current->left) {
+                current->left = temp;
+                break;
+            }
+            current = current->left;
+        } else {
+            if (!current->right) {
+                current->right = temp;
+                break;
+            }
+            current = current->right;
+        }
+    }
+}
+
+void BinaryTree::Inorder(Node* node) {
+    if (!node) return;
+    Inorder(node->left);
+    cout << node->data << " ";
+    Inorder(node->right);
+}
+
+void BinaryTree::Preorder(Node* node) {
+    if (!node) return;
+    cout << node->data << " ";
+    Preorder(node->left);
+    Preorder(node->right);
+}
+
+void BinaryTree::Postorder(Node* node) {
+    if (!node) return;
+    Postorder(node->left);
+    Postorder(node->right);
+    cout << node->data << " ";
+}
+
+Node* BinaryTree::minValueNode(Node* node) {
+    while (node && node->left) node = node->left;
+    return node;
+}
+
+Node* BinaryTree::deleteNode(Node* root, int key) {
+    if (!root) {
+        cout << "Value not found in the tree.\n";
+        return nullptr;
+    }
+    if (key < root->data) {
+        root->left = deleteNode(root->left, key);
+    } else if (key > root->data) {
+        root->right = deleteNode(root->right, key);
+    } else {
+        if (!root->left) {
+            Node* temp = root->right;
+            delete root;
+            return temp;
+        }
+        if (!root->right) {
+            Node* temp = root->left;
+            delete root;
+            return temp;
+        }
+        Node* temp = minValueNode(root->right);
+        root->data = temp->data;
+        root->right = deleteNode(root->right, temp->data);
+    }
+    cout << "Required value is deleted\n";
+    return root;
+}
+
+void BinaryTree::levelWisePrinting() {
+    if (!root) {
+        cout << "Tree is empty.\n";
+        return;
+    }
+    queue<Node*> q;
+    q.push(root);
+    cout << "\nLevel-wise traversal: ";
+    while (!q.empty()) {
+        Node* current = q.front();
+        q.pop();
+        cout << current->data << " ";
+        if (current->left) q.push(current->left);
+        if (current->right) q.push(current->right);
+    }
+    cout << endl;
+}
+
+void BinaryTree::nonRecursiveInorder() {
+    if (!root) {
+        cout << "Tree is empty!" << endl;
+        return;
+    }
+    stack<Node*> s;
+    Node* current = root;
+    cout << "Non-Recursive Inorder: ";
+    while (current || !s.empty()) {
+        while (current) {
+            s.push(current);
+            current = current->left;
+        }
+        current = s.top();
+        s.pop();
+        cout << current->data << " ";
+        current = current->right;
+    }
+    cout << endl;
+}
+
+void BinaryTree::nonRecursivePreorder() {
+    if (!root) {
+        cout << "Tree is empty!" << endl;
+        return;
+    }
+    stack<Node*> s;
+    s.push(root);
+    cout << "Non-Recursive Preorder: ";
+    while (!s.empty()) {
+        Node* current = s.top();
+        s.pop();
+        cout << current->data << " ";
+        if (current->right) s.push(current->right);
+        if (current->left) s.push(current->left);
+    }
+    cout << endl;
+}
+
+void BinaryTree::nonRecursivePostorder() {
+    if (!root) {
+        cout << "Tree is empty!" << endl;
+        return;
+    }
+    stack<Node*> s1, s2;
+    s1.push(root);
+    cout << "Non-Recursive Postorder: ";
+    while (!s1.empty()) {
+        Node* current = s1.top();
+        s1.pop();
+        s2.push(current);
+        if (current->left) s1.push(current->left);
+        if (current->right) s1.push(current->right);
+    }
+    while (!s2.empty()) {
+        cout << s2.top()->data << " ";
+        s2.pop();
+    }
+    cout << endl;
+}
+
+Node* BinaryTree::search(Node* node, int key) {
+    if (!node || node->data == key) return node;
+    if (key < node->data) return search(node->left, key);
+    return search(node->right, key);
+}
+
+void BinaryTree::menu() {
+    int choice, value;
+    do {
+        cout << "\n======= Binary Tree Menu =======\n";
+        cout << "1. Insert\n";
+        cout << "2. Recursive Inorder\n";
+        cout << "3. Recursive Preorder\n";
+        cout << "4. Recursive Postorder\n";
+        cout << "5. Delete Node\n";
+        cout << "6. Level-wise Printing\n";
+        cout << "7. Non-Recursive Inorder\n";
+        cout << "8. Non-Recursive Preorder\n";
+        cout << "9. Non-Recursive Postorder\n";
+        cout << "10. Quit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter value: ";
+                cin >> value;
+                createNode(value);
+                break;
+            case 2:
+                cout << "Recursive Inorder: ";
+                Inorder(root);
+                cout << endl;
+                break;
+            case 3:
+                cout << "Recursive Preorder: ";
+                Preorder(root);
+                cout << endl;
+                break;
+            case 4:
+                cout << "Recursive Postorder: ";
+                Postorder(root);
+                cout << endl;
+                break;
+            case 5:
+                cout << "Enter value to delete: ";
+                cin >> value;
+                root = deleteNode(root, value);
+                break;
+            case 6:
+                levelWisePrinting();
+                break;
+            case 7:
+                nonRecursiveInorder();
+                break;
+            case 8:
+                nonRecursivePreorder();
+                break;
+            case 9:
+                nonRecursivePostorder();
+                break;
+            case 10:
+                cout << "Exiting program.......\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 10);
+}
+
+int main() {
+    BinaryTree bt;
+    bt.menu();
+    return 0;
+}
+
+-----------------TBT----------------
+#include <iostream> 
+using namespace std; 
+ 
+class ThreadedBinaryTree { 
+private: 
+    class Node { 
+    public: 
+        int data; 
+        Node *left, *right; 
+        int lbit, rbit; 
+ 
+        Node(int val) { 
+            data = val; 
+            left = right = nullptr; 
+            lbit = rbit = 0; 
+        } 
+    }; 
+ 
+    Node *root, *head; 
+ 
+public: 
+    ThreadedBinaryTree(); 
+    void create(); 
+    void insert(Node *temp); 
+    void inorder(); 
+    void preorder(); 
+    void search(int key);   
+    void displayMenu(); 
+    void executeMenu(); 
+}; 
+ 
+ThreadedBinaryTree::ThreadedBinaryTree() { 
+    root = nullptr; 
+    head = nullptr; 
+} 
+ 
+void ThreadedBinaryTree::create() { 
+    char ch; 
+    do { 
+        int val; 
+        cout << "Enter data: "; 
+        cin >> val; 
+        Node *temp = new Node(val); 
+        
+        if (root == nullptr) { 
+            root = temp; 
+            head = new Node(999); 
+            head->right = head; 
+            head->rbit = 1; 
+            head->left = root; 
+            head->lbit = 1; 
+            root->left = head; 
+            root->right = head; 
+        } else { 
+            insert(temp); 
+        } 
+        
+        cout << "Do you want to insert more nodes? (y/n): "; 
+        cin >> ch; 
+    } while (ch == 'y'); 
+} 
+ 
+void ThreadedBinaryTree::insert(Node *temp) { 
+    Node *current = root, *parent = nullptr; 
+    while (current != head) { 
+        parent = current; 
+        if (temp->data < current->data) { 
+            if (current->lbit == 1) 
+                current = current->left; 
+            else 
+                break; 
+        } else { 
+            if (current->rbit == 1) 
+                current = current->right; 
+            else 
+                break; 
+        } 
+    } 
+ 
+    if (temp->data < parent->data) { 
+        temp->left = parent->left; 
+        temp->right = parent; 
+        parent->left = temp; 
+        parent->lbit = 1; 
+    } else { 
+        temp->right = parent->right; 
+        temp->left = parent; 
+        parent->right = temp; 
+        parent->rbit = 1; 
+    } 
+} 
+ 
+void ThreadedBinaryTree::inorder() { 
+    Node *current = head->left; 
+    while (current != head) { 
+        while (current->lbit == 1) 
+            current = current->left; 
+        cout << current->data << " "; 
+        
+        while (current->rbit == 0) { 
+            current = current->right; 
+            if (current == head) return; 
+            cout << current->data << " "; 
+        } 
+        current = current->right; 
+    } 
+} 
+ 
+void ThreadedBinaryTree::preorder() { 
+    Node *current = head->left; 
+    while (current != head) { 
+        cout << current->data << " "; 
+        
+        if (current->lbit == 1) 
+            current = current->left; 
+        else { 
+            while (current->rbit == 0 && current->right != head) 
+                current = current->right; 
+            current = current->right; 
+        } 
+    } 
+} 
+
+
+void ThreadedBinaryTree::search(int key) {
+    Node *current = root;
+    while (current != head) {
+        if (key == current->data) {
+            cout << "Element " << key << " found in the tree.\n";
+            return;
+        } else if (key < current->data) {
+            if (current->lbit == 1)
+                current = current->left;
+            else
+                break;
+        } else {
+            if (current->rbit == 1)
+                current = current->right;
+            else
+                break;
+        }
+    }
+    cout << "Element " << key << " not found in the tree.\n";
+}
+ 
+void ThreadedBinaryTree::displayMenu() { 
+    cout << "\nMenu:\n"; 
+    cout << "1. Insert Node\n"; 
+    cout << "2. Inorder Traversal\n"; 
+    cout << "3. Preorder Traversal\n"; 
+    cout << "4. Search Node\n";  // <-- added in menu
+    cout << "5. Exit\n"; 
+} 
+ 
+void ThreadedBinaryTree::executeMenu() { 
+    int choice; 
+    do { 
+        displayMenu(); 
+        cout << "Enter your choice: "; 
+        cin >> choice; 
+        switch (choice) { 
+        case 1: 
+            create(); 
+            break; 
+        case 2: 
+            cout << "\nInorder Traversal: ";     
+            inorder(); 
+            cout << endl; 
+            break; 
+        case 3: 
+            cout << "\nPreorder Traversal: "; 
+            preorder(); 
+            cout << endl; 
+            break; 
+        case 4:
+            int key;
+            cout << "Enter element to search: ";
+            cin >> key;
+            search(key);
+            break;
+        case 5: 
+            cout << "Exiting program...\n"; 
+            break; 
+        default: 
+            cout << "Invalid choice, please try again.\n"; 
+        } 
+    } while (choice != 5); 
+} 
+ 
+int main() { 
+    ThreadedBinaryTree tree; 
+    tree.executeMenu(); 
+    return 0; 
+}
+------------AVL--------------
+#include <iostream>
+#include <stack>
+#include <queue>
+using namespace std;
+
+class Node {
+public:
+    int data, height;
+    Node* left;
+    Node* right;
+
+    Node(int value) {
+        data = value;
+        height = 1;
+        left = right = nullptr;
+    }
+};
+
+class AVLTree {
+public:
+    Node* root;
+
+    AVLTree() { root = nullptr; }
+
+    int height(Node* n);
+    int getBalance(Node* n);
+    Node* rightRotate(Node* y);
+    Node* leftRotate(Node* x);
+    Node* insert(Node* node, int key);
+    Node* minValueNode(Node* node);
+    Node* deleteNode(Node* root, int key);
+    Node* search(Node* node, int key);
+
+    void Inorder(Node* node);
+    void Preorder(Node* node);
+    void Postorder(Node* node);
+
+    void nonRecursiveInorder();
+    void nonRecursivePreorder();
+    void nonRecursivePostorder();
+    void levelOrder();
+
+    void menu();
+};
+
+int AVLTree::height(Node* n) {
+    return n ? n->height : 0;
+}
+
+int AVLTree::getBalance(Node* n) {
+    return n ? height(n->left) - height(n->right) : 0;
+}
+
+Node* AVLTree::rightRotate(Node* y) {
+    Node* x = y->left;
+    Node* T2 = x->right;
+    x->right = y;
+    y->left = T2;
+    y->height = max(height(y->left), height(y->right)) + 1;
+    x->height = max(height(x->left), height(x->right)) + 1;
+    return x;
+}
+
+Node* AVLTree::leftRotate(Node* x) {
+    Node* y = x->right;
+    Node* T2 = y->left;
+    y->left = x;
+    x->right = T2;
+    x->height = max(height(x->left), height(x->right)) + 1;
+    y->height = max(height(y->left), height(y->right)) + 1;
+    return y;
+}
+
+Node* AVLTree::insert(Node* node, int key) {
+    if (!node) return new Node(key);
+
+    if (key < node->data)
+        node->left = insert(node->left, key);
+    else if (key > node->data)
+        node->right = insert(node->right, key);
+    else
+        return node; // Duplicate keys not allowed
+
+    node->height = 1 + max(height(node->left), height(node->right));
+    int balance = getBalance(node);
+
+    if (balance > 1 && key < node->left->data)
+        return rightRotate(node);
+    if (balance < -1 && key > node->right->data)
+        return leftRotate(node);
+    if (balance > 1 && key > node->left->data) {
+        node->left = leftRotate(node->left);
+        return rightRotate(node);
+    }
+    if (balance < -1 && key < node->right->data) {
+        node->right = rightRotate(node->right);
+        return leftRotate(node);
+    }
+
+    return node;
+}
+
+Node* AVLTree::minValueNode(Node* node) {
+    Node* current = node;
+    while (current->left)
+        current = current->left;
+    return current;
+}
+
+Node* AVLTree::deleteNode(Node* root, int key) {
+    if (!root) {
+        cout << "Value not found in the tree.\n";
+        return nullptr;
+    }
+
+    if (key < root->data)
+        root->left = deleteNode(root->left, key);
+    else if (key > root->data)
+        root->right = deleteNode(root->right, key);
+    else {
+        if (!root->left || !root->right) {
+            Node* temp = root->left ? root->left : root->right;
+            if (!temp) {
+                temp = root;
+                root = nullptr;
+            } else
+                *root = *temp;
+            delete temp;
+        } else {
+            Node* temp = minValueNode(root->right);
+            root->data = temp->data;
+            root->right = deleteNode(root->right, temp->data);
+        }
+    }
+
+    if (!root) return nullptr;
+
+    root->height = 1 + max(height(root->left), height(root->right));
+    int balance = getBalance(root);
+
+    if (balance > 1 && getBalance(root->left) >= 0)
+        return rightRotate(root);
+    if (balance > 1 && getBalance(root->left) < 0) {
+        root->left = leftRotate(root->left);
+        return rightRotate(root);
+    }
+    if (balance < -1 && getBalance(root->right) <= 0)
+        return leftRotate(root);
+    if (balance < -1 && getBalance(root->right) > 0) {
+        root->right = rightRotate(root->right);
+        return leftRotate(root);
+    }
+
+    cout << "Required value is deleted\n";
+    return root;
+}
+
+Node* AVLTree::search(Node* node, int key) {
+    if (!node || node->data == key)
+        return node;
+    if (key < node->data)
+        return search(node->left, key);
+    return search(node->right, key);
+}
+
+void AVLTree::Inorder(Node* node) {
+    if (!node) return;
+    Inorder(node->left);
+    cout << node->data << " ";
+    Inorder(node->right);
+}
+
+void AVLTree::Preorder(Node* node) {
+    if (!node) return;
+    cout << node->data << " ";
+    Preorder(node->left);
+    Preorder(node->right);
+}
+
+void AVLTree::Postorder(Node* node) {
+    if (!node) return;
+    Postorder(node->left);
+    Postorder(node->right);
+    cout << node->data << " ";
+}
+
+void AVLTree::nonRecursiveInorder() {
+    if (!root) { cout << "Tree is empty!" << endl; return; }
+    stack<Node*> s;
+    Node* current = root;
+    cout << "Non-Recursive Inorder: ";
+    while (current || !s.empty()) {
+        while (current) {
+            s.push(current);
+            current = current->left;
+        }
+        current = s.top(); s.pop();
+        cout << current->data << " ";
+        current = current->right;
+    }
+    cout << endl;
+}
+
+void AVLTree::nonRecursivePreorder() {
+    if (!root) { cout << "Tree is empty!" << endl; return; }
+    stack<Node*> s;
+    s.push(root);
+    cout << "Non-Recursive Preorder: ";
+    while (!s.empty()) {
+        Node* current = s.top(); s.pop();
+        cout << current->data << " ";
+        if (current->right) s.push(current->right);
+        if (current->left) s.push(current->left);
+    }
+    cout << endl;
+}
+
+void AVLTree::nonRecursivePostorder() {
+    if (!root) { cout << "Tree is empty!" << endl; return; }
+    stack<Node*> s1, s2;
+    s1.push(root);
+    cout << "Non-Recursive Postorder: ";
+    while (!s1.empty()) {
+        Node* current = s1.top(); s1.pop();
+        s2.push(current);
+        if (current->left) s1.push(current->left);
+        if (current->right) s1.push(current->right);
+    }
+    while (!s2.empty()) {
+        cout << s2.top()->data << " ";
+        s2.pop();
+    }
+    cout << endl;
+}
+
+void AVLTree::levelOrder() {
+    if (!root) { cout << "Tree is empty.\n"; return; }
+    queue<Node*> q;
+    q.push(root);
+    cout << "\nLevel-wise traversal: ";
+    while (!q.empty()) {
+        Node* current = q.front(); q.pop();
+        cout << current->data << " ";
+        if (current->left) q.push(current->left);
+        if (current->right) q.push(current->right);
+    }
+    cout << endl;
+}
+
+void AVLTree::menu() {
+    int choice, value;
+    do {
+        cout << "\n======= AVL Tree Menu =======\n";
+        cout << "1. Insert\n";
+        cout << "2. Recursive Inorder\n";
+        cout << "3. Recursive Preorder\n";
+        cout << "4. Recursive Postorder\n";
+        cout << "5. Delete Node\n";
+        cout << "6. Level-wise Printing\n";
+        cout << "7. Non-Recursive Inorder\n";
+        cout << "8. Non-Recursive Preorder\n";
+        cout << "9. Non-Recursive Postorder\n";
+        cout << "10. Quit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter value: ";
+                cin >> value;
+                root = insert(root, value);
+                break;
+            case 2:
+                cout << "Recursive Inorder: ";
+                Inorder(root);
+                cout << endl;
+                break;
+            case 3:
+                cout << "Recursive Preorder: ";
+                Preorder(root);
+                cout << endl;
+                break;
+            case 4:
+                cout << "Recursive Postorder: ";
+                Postorder(root);
+                cout << endl;
+                break;
+            case 5:
+                cout << "Enter value to delete: ";
+                cin >> value;
+                root = deleteNode(root, value);
+                break;
+            case 6:
+                levelOrder();
+                break;
+            case 7:
+                nonRecursiveInorder();
+                break;
+            case 8:
+                nonRecursivePreorder();
+                break;
+            case 9:
+                nonRecursivePostorder();
+                break;
+            case 10:
+                cout << "Exiting program.......\n";
+                break;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while (choice != 10);
+}
+
+int main() {
+    AVLTree avl;
+    avl.menu();
+    return 0;
+}
+--------------Prism------------
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+#define INF 9999
+
+int main() {
+    int V1; // Number of vertices
+    cout << "Enter the total number of vertices: ";
+    cin >> V1;
+
+    int G[V1][V1]; // Graph adjacency matrix
+    bool selected[V1]; // Tracks selected nodes for MST
+    int no_edge = 0, cost_path = 0;
+
+    // Input graph matrix
+    for (int i = 0; i < V1; i++) {
+        for (int j = 0; j < V1; j++) {
+            if (i == j) {
+                G[i][j] = INF; // No self-loops
+            } else if (j > i) {
+                cout << "Enter weight from " << i << " to " << j << ": ";
+                cin >> G[i][j];
+                if (G[i][j] == 0) G[i][j] = INF; // Replace 0 with INF for non-edges
+                G[j][i] = G[i][j]; // Undirected graph
+            }
+        }
+    }
+
+    // Display input graph matrix
+    cout << "\nAdjacency Matrix:\n";
+    for (int i = 0; i < V1; i++) {
+        for (int j = 0; j < V1; j++) {
+            cout << (G[i][j] == INF ? "INF" : to_string(G[i][j])) << " ";
+        }
+        cout << endl;
+    }
+
+    // Prim's Algorithm
+    fill(selected, selected + V1, false); // Initialize selected array
+    selected[0] = true; // Start from the first node
+
+    cout << "\nEdges in MST:\n";
+    cout << "Edge : Weight\n";
+
+    while (no_edge < V1 - 1) {
+        int min = INF, x = -1, y = -1;
+
+        for (int i = 0; i < V1; i++) {
+            if (selected[i]) {
+                for (int j = 0; j < V1; j++) {
+                    if (!selected[j] && G[i][j] < min) {
+                        min = G[i][j];
+                        x = i;
+                        y = j;
+                    }
+                }
+            }
+        }
+
+        if (x != -1 && y != -1) {
+            cout << x << " --> " << y << " : " << G[x][y] << endl;
+            cost_path += G[x][y];
+            selected[y] = true;
+            no_edge++;
+        }
+    }
+
+    cout << "\nMinimum cost of MST: " << cost_path << endl;
+    return 0;
+}
+------------Kruskal-----------
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+#define MAX 100
+
+class Edge {
+public:
+    int u, v, weight;
+};
+
+class KruskalMST {
+private:
+    Edge edges[MAX];
+    Edge mst[MAX];
+    int parent[MAX];
+    int n, e;
+
+    int find(int i) {
+        if (parent[i] == i)
+            return i;
+        return parent[i] = find(parent[i]);
+    }
+
+    void unionSets(int u, int v) {
+        int set_u = find(u);
+        int set_v = find(v);
+        parent[set_u] = set_v;
+    }
+
+    static bool compare(Edge a, Edge b) {
+        return a.weight < b.weight;
+    }
+
+public:
+    void inputGraph() {
+        cout << "Enter number of vertices: ";
+        cin >> n;
+        cout << "Enter number of edges: ";
+        cin >> e;
+
+        for (int i = 0; i < e; i++) {
+            cout << "Enter edge " << i + 1 << " (u v weight): ";
+            cin >> edges[i].u >> edges[i].v >> edges[i].weight;
+        }
+    }
+
+    void initializeParent() {
+        for (int i = 0; i < n; i++)
+            parent[i] = i;
+    }
+
+    void kruskal() {
+        // Sort edges by weight
+        sort(edges, edges + e, compare);
+
+        int totalWeight = 0;
+        int count = 0;
+
+        for (int i = 0; i < e && count < n - 1; i++) {
+            int u = edges[i].u;
+            int v = edges[i].v;
+            int set_u = find(u);
+            int set_v = find(v);
+
+            if (set_u != set_v) {
+                mst[count++] = edges[i];
+                totalWeight += edges[i].weight;
+                unionSets(u, v);
+            }
+        }
+
+        // Display MST
+        cout << "\nEdges in Minimum Spanning Tree:\n";
+        for (int i = 0; i < count; i++) {
+            cout << mst[i].u << " - " << mst[i].v << " : " << mst[i].weight << endl;
+        }
+        cout << "Total weight: " << totalWeight << endl;
+    }
+};
+
+int main() {
+    KruskalMST graph;
+    graph.inputGraph();
+    graph.initializeParent();
+    graph.kruskal();
+
+    return 0;
+}
+----------HeapSort------------
+
+#include <iostream>
+using namespace std;
+
+class Heap {
+public:
+    int arr[100];
+
+    void getArray(int n);
+    void printArray(int n);
+    void maxHeapify(int arr[], int n, int i);
+    void maxheapsort(int arr[], int n);
+    void minHeapify(int arr[], int n, int i);
+    void minheapsort(int arr[], int n);
+};
+
+// Accept user input
+void Heap::getArray(int n) {
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+    }
+}
+
+// Print array elements
+void Heap::printArray(int n) {
+    for (int i = 0; i < n; i++) {
+        cout << " " << arr[i];
+    }
+    cout << endl;
+}
+
+// Heapify subtree rooted at index i (Max Heap)
+void Heap::maxHeapify(int arr[], int n, int i) {
+    int max = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n && arr[left] > arr[max]) {
+        max = left;
+    }
+    if (right < n && arr[right] > arr[max]) {
+        max = right;
+    }
+
+    if (max != i) {
+        swap(arr[i], arr[max]);
+        maxHeapify(arr, n, max);
+    }
+}
+
+// Perform Heap Sort using Max Heap (Ascending Order)
+void Heap::maxheapsort(int arr[], int n) {
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        maxHeapify(arr, n, i);
+    }
+    for (int i = n - 1; i >= 0; i--) {
+        swap(arr[0], arr[i]);
+        maxHeapify(arr, i, 0);
+    }
+}
+
+// Heapify subtree rooted at index i (Min Heap)
+void Heap::minHeapify(int arr[], int n, int i) {
+    int min = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n && arr[left] < arr[min]) {
+        min = left;
+    }
+    if (right < n && arr[right] < arr[min]) {
+        min = right;
+    }
+
+    if (min != i) {
+        swap(arr[i], arr[min]);
+        minHeapify(arr, n, min);
+    }
+}
+
+// Perform Heap Sort using Min Heap (Descending Order)
+void Heap::minheapsort(int arr[], int n) {
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        minHeapify(arr, n, i);
+    }
+    for (int i = n - 1; i >= 0; i--) {
+        swap(arr[0], arr[i]);
+        minHeapify(arr, i, 0);
+    }
+}
+
+int main() {
+    Heap h1;
+    int n, a = 1;
+
+    cout << "\n Heap Sort Program";
+    while (a == 1) {
+        cout << "\n ----------------------------------------" << endl;
+        cout << "\n Enter The Number of Elements: ";
+        cin >> n;
+        cout << "\n Enter The Array Elements: " << endl;
+        h1.getArray(n);
+
+        cout << "\n Array Before Sorting:-" << endl;
+        h1.printArray(n);
+
+        h1.maxheapsort(h1.arr, n);
+        cout << "\n Array After Sorting (Max Heapify - Ascending Order):- " << endl;
+        h1.printArray(n);
+
+        h1.minheapsort(h1.arr, n);
+        cout << "\n Array After Sorting (Min Heapify - Descending Order):- " << endl;
+        h1.printArray(n);
+
+        cout << "\n Do You Want to Continue? Press 1 Else 0: ";
+        cin >> a;
+    }
+
+    return 0;
+}
+-----Bloom-------
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+const int SIZE = 50;
+
+int hash1(string key) {
+    int sum = 0;
+    for (char c : key) sum += c;
+    return sum % SIZE;
+}
+
+int hash2(string key) {
+    int sum = 0;
+    for (int i = 0; i < key.size(); i++) sum += (i + 1) * key[i];
+    return sum % SIZE;
+}
+
+int hash3(string key) {
+    int sum = 0;
+    for (char c : key) sum += c * c;
+    return sum % SIZE;
+}
+
+int main() {
+    vector<int> bloom(SIZE, 0);
+    int n;
+    cout << "How many words to insert in Bloom Filter? ";
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        string word;
+        cout << "Enter word " << i + 1 << ": ";
+        cin >> word;
+        bloom[hash1(word)] = 1;
+        bloom[hash2(word)] = 1;
+        bloom[hash3(word)] = 1;
+    }
+
+    cout << "\nHow many words to search? ";
+    int m;
+    cin >> m;
+    for (int i = 0; i < m; i++) {
+        string query;
+        cout << "Enter search word " << i + 1 << ": ";
+        cin >> query;
+        if (bloom[hash1(query)] && bloom[hash2(query)] && bloom[hash3(query)])
+            cout << query << " might be present.\n";
+        else
+            cout << query << " is definitely not present.\n";
+    }
+
+    return 0;
+}
+-----------Cuckoo-----
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+const int SIZE = 20;
+
+int hash1(string key) {
+    int sum = 0;
+    for (char c : key) sum += c;
+    return sum % SIZE;
+}
+
+int hash2(string key) {
+    int sum = 0;
+    for (int i = 0; i < key.size(); i++) sum += (i + 1) * key[i];
+    return sum % SIZE;
+}
+
+int main() {
+    vector<string> cuckoo(SIZE, "");
+    int n;
+    cout << "How many words to insert in Cuckoo Filter? ";
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        string word;
+        cout << "Enter word " << i + 1 << ": ";
+        cin >> word;
+
+        int idx1 = hash1(word);
+        int idx2 = hash2(word);
+
+        if (cuckoo[idx1] == "") {
+            cuckoo[idx1] = word;
+            cout << "Inserted at position " << idx1 << endl;
+        } else if (cuckoo[idx2] == "") {
+            cuckoo[idx2] = word;
+            cout << "Inserted at position " << idx2 << endl;
+        } else {
+            cout << "Both positions occupied! Cannot insert " << word << endl;
+        }
+    }
+
+    cout << "\nHow many words to search? ";
+    int m;
+    cin >> m;
+    for (int i = 0; i < m; i++) {
+        string query;
+        cout << "Enter search word " << i + 1 << ": ";
+        cin >> query;
+
+        int idx1 = hash1(query);
+        int idx2 = hash2(query);
+
+        if (cuckoo[idx1] == query || cuckoo[idx2] == query)
+            cout << query << " is present.\n";
+        else
+            cout << query << " is not present.\n";
+    }
+
+    return 0;
+}
